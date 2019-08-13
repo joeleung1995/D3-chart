@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+		}
+	</style>
+</head>
+<body>
+	<div class="box"></div>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<script type="text/javascript">
+		
+		let data = [
+			[0.5, 0.5], [0.7, 0.8], [0.4, 0.9],
+			[0.11, 0.32], [0.88, 0.25], [0.75, 0.12],
+			[0.5, 0.1], [0.2, 0.3], [0.4, 1.1],
+			[0.6, 0.7]
+		]
+
+		let width = 400
+		let height = 400
+
+		function draw (data, w, h) {
+			let padding = 30
+			w -= padding * 2
+			h -= padding * 2
+
+			// 比例尺
+			let scaleX = d3.scale.linear()
+				.domain([0, Math.ceil(d3.max(data, d => d[0]))])
+				.range([0, w])
+			let scaleY = d3.scale.linear()
+				.domain([0, Math.ceil(d3.max(data, d => d[1]))])
+				.range([0, h])
+
+			// 散点图
+			let svg = d3.select('.box').append('svg')
+				.attr('width', width)
+				.attr('height', height)
+			let update = svg.selectAll('circle').data(data)
+			let enter = update.enter()
+			let exit = update.exit()
+			enter.append('circle')
+				.attr('fill', 'black')
+				.attr('r', w / 100)
+				.attr('cx', (d, i) => {
+					return scaleX(d[0]) + padding
+				})
+				.attr('cy', (d, i) => {
+					return h - scaleY(d[1]) + padding
+				})
+			exit.remove()
+
+			// 坐标轴
+			let gAxisX = svg.append('g')
+				.classed('axis', true)
+				.attr('transform', `translate(${padding}, ${h + padding})`)
+			let axisX = d3.svg.axis()
+				.scale(scaleX)
+				.orient('bottom')
+			let gAxisY = svg.append('g')
+				.classed('axis', true)
+				.attr('transform', `translate(${padding}, ${padding})`)
+			scaleY.range().reverse()
+			let axisY = d3.svg.axis()
+				.scale(scaleY)
+				.orient('left')
+			axisX(gAxisX)
+			axisY(gAxisY)
+		}
+
+		draw(data, width, height)
+
+	</script>
+</body>
+</html>

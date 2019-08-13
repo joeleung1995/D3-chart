@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<style type="text/css">
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+		}
+	</style>
+</head>
+<body>
+	<div id="box"></div>
+	<script type="text/javascript">
+
+		// --------------------基础的坐标轴--------------------
+	
+		// let width = 600
+		// let height = 600
+
+		// let svg = d3.select('body').append('svg')
+		// 	.attr('width', width)
+		// 	.attr('height', height)
+
+		// let xScale = d3.scale.linear()
+		// 	.domain([0, 10])
+		// 	.range([0, 300])
+
+		// let axis = d3.svg.axis()
+		// 	.scale(xScale) // 设定大小
+		// 	.orient('bottom') // 方向向下
+
+		// let gAxis = svg.append('g')
+		// 	.attr('transform', 'translate(80, 80)') // 平移到80， 80
+		// 	.attr('class', 'axis')
+
+		// axis(gAxis)
+
+
+		// ---------------刻度、方向、刻度线、文字格式化---------------
+
+
+		let width = 600
+		let height = 600
+
+		let svg = d3.select('body').append('svg')
+			.attr('width', width)
+			.attr('height', height)
+
+		let xScale = d3.scale.linear()
+			.domain([0, 10])
+			.range([0, 300])
+
+		let axisLeft = d3.svg.axis()
+			.scale(xScale)
+			.orient('left')
+			.ticks(5)
+
+		let axisRight = d3.svg.axis()
+			.scale(xScale)
+			.orient('right')
+			.tickValues([3, 4, 5, 6, 7])
+			.tickSize(5, 10)
+			.tickFormat(d3.format('$0.1f'))
+
+		let gLeft = svg.append('g')
+			.attr('transform', 'translate(80, 80)')
+			.attr('class', 'axis')
+
+		let gRight = svg.append('g')
+			.attr('transform', 'translate(280, 80)')
+			.attr('class', 'axis')
+
+		axisLeft(gLeft)
+		axisRight(gRight)
+
+	</script>
+</body>
+</html>

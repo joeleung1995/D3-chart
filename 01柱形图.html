@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+</head>
+<body>
+
+	<div class="box"></div>
+	<button id='addBtn'>Add</button>
+	<button id='delBtn'>Del</button>
+
+	<script type="text/javascript">
+		let width = 400
+		let height = 400
+		let padding = { top: 20, right: 20, bottom: 20, left: 20 }
+		let rectStep = 35
+		let rectWidth = 30
+		let svg = d3.select('.box').append('svg').attr('width', width).attr('height', height)
+		
+		function draw (data) {
+			let rectUpdate = svg.selectAll('rect').data(data)
+			let rectEnter = rectUpdate.enter()
+			let rectExit = rectUpdate.exit()
+			rectEnter.append('rect')
+				.attr('fill', 'steelblue')
+				.attr('x', (d, i) => padding.left + i * rectStep )
+				.attr('y', (d, i) => height - padding.bottom - d * 50 )
+				.attr('width', rectWidth)
+				.attr('height', d => d * 50)
+			rectExit.remove()
+
+			let textUpdate = svg.selectAll('text').data(data)
+			let textEnter = textUpdate.enter()
+			let textExit = textUpdate.exit()
+			textEnter.append('text')
+				.attr('fill', 'white')
+				.attr('font-size', '12px')
+				.attr('text-anchor', 'middle')
+				.attr('x', (d, i) => padding.left + i * rectStep)
+				.attr('y', (d, i) => height - padding.bottom - d * 50)
+				.attr('dx', rectWidth / 2)
+				.attr('dy', '1.3em')
+				.text(d => d)
+			textExit.remove()
+		}
+
+		let arr = [1, 2, 3, 4, 5, 3, 2]
+		draw(arr)		
+
+		let addBtn = document.getElementById('addBtn')
+		let delBtn = document.getElementById('delBtn')
+
+		addBtn.onclick = function () {
+			let newArr = [1, 2, 3, 4, 5, 3, 2, 6, 4]
+			draw(newArr)
+		}
+		delBtn.onclick = function () {
+			let newArr = [1, 3, 2]
+			draw(newArr)
+		}
+
+
+
+	</script>
+</body>
+</html>
