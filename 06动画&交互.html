@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<div class="box"></div>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<script type="text/javascript">
+		
+		// 画板
+		let svg = d3.select('.box').append('svg')
+			.attr('width', '400')
+			.attr('height', '400')
+
+		// 基础过渡效果
+		// svg.append('rect')
+		// 	.attr('fill', 'steelblue')
+		// 	.attr('x', '10')
+		// 	.attr('y', '10')
+		// 	.attr('width', '100')
+		// 	.attr('height', '100')
+		// 	.transition() // 返回一个过渡对象
+		// 	.duration(2000)
+		// 	.attr('height', '300') // 先变高
+		// 	.style('fill', 'pink')
+		// 	.transition()
+		// 	.duration(1000)
+		// 	.attr('width', '300') // 后变宽 
+
+		// 文字过渡 & attrTween
+		// svg.append('rect')
+		// 	.attr('fill', 'steelblue')
+		// 	.attr('x', '10')
+		// 	.attr('y', '10')
+		// 	.attr('width', '50')
+		// 	.attr('height', '50')
+		// 	.transition()
+		// 	.duration(2000)
+		// 	.attrTween('width', (d, i, a) => {
+		// 		return (t) => {
+		// 			return Number(a) + t * 300
+		// 		} 
+		// 	})
+		// let text = svg.append('text')
+		// 	.attr('fill', 'white')
+		// 	.attr('x', 10)
+		// 	.attr('y', 35)
+		// 	.attr('dy', '0.5em')
+		// 	.attr('text-anchor', 'start')
+		// 	.text(50)
+		// 	.transition()
+		// 	.duration(2000)
+		// 	.tween('text', function (d, i, a) {
+		// 		return function (t) {
+		// 			d3.select(this)
+		// 				.attr('x', 10 + t * 300 )
+		// 				.text(Math.floor(50 + t * 250))
+		// 		}
+		// 	})
+
+		// 子元素
+		// let data = [100, 100, 100]
+		// let g = svg.append('g')
+		// let rect = g.selectAll('rect').data(data)
+		// 	.enter()
+		// 	.append('rect')
+		// 	.attr('x', '10')
+		// 	.attr('y', (d, i) => i * 35)
+		// 	.attr('width', d => d)
+		// 	.attr('height', 30)
+		// 	.attr('fill', 'steelblue')
+		// 	.attr('id', (d, i) => 'rect' + i)
+		// g.select('#rect1').transition().attr('width', 300).each('start', () => {
+		// 	console.log('start')
+		// })
+
+		// 拖拽交互
+		// let drag = d3.behavior.drag()
+		// 	.on('dragstart', () => {
+		// 		console.log('start')
+		// 	})
+		// 	.on('drag', function () {
+		// 		d3.select(this)
+		// 			.attr('x', d3.event.x)
+		// 			.attr('y', d3.event.y)
+		// 	})
+		// 	.on('dragend', () => {
+		// 		console.log('stop')
+		// 	})
+
+		// svg.append('rect')
+		// 	.attr('width', '200')
+		// 	.attr('height', '200')
+		// 	.attr('fill', 'steelblue')
+		// 	.call(drag)
+
+		// 缩放交互
+		let circles = [
+			{ cx: 150, cy: 200, r: 30 },
+			{ cx: 220, cy: 200, r: 30 },
+			{ cx: 150, cy: 270, r: 30 },
+			{ cx: 220, cy: 270, r: 30 }
+		]
+
+		let zoom = d3.behavior.zoom()
+			.scaleExtent([1, 10])
+			.on('zoom', function () {
+				d3.select(this)
+					.attr('transform', `translate(${ d3.event.translate }) scale(${ d3.event.scale })`)
+			})
+
+		let g = svg.append('g')
+			.call(zoom)
+
+		g.selectAll('circle')
+			.data(circles)
+			.enter()
+			.append('circle')
+			.attr('cx', d => d.cx)
+			.attr('cy', d => d.cy )
+			.attr('r', d => d.r)
+			.attr('fill', 'steelblue')
+
+	</script>
+</body>
+</html>
