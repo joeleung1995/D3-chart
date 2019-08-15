@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<div class="box"></div>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<script type="text/javascript">
+
+		let svg = d3.select('.box').append('svg')
+			.attr('width', '400')
+			.attr('height', '400')
+		
+		let data = [
+			[ '小米', 60.8 ],
+			[ '三星', 58.4 ],
+			[ '联想', 47.3 ],
+			[ '苹果', 46.6 ],
+			[ '华为', 41.3 ],
+			[ '酷派', 40.1 ],
+			[ '其他', 111.5 ]
+		]
+
+		let pie = d3.layout.pie().value(d => d[1])
+		let pieData = pie(data)
+
+		let width = 400
+		let height = 400
+		let outerRadius = width / 3
+		let innerRadius = 0
+
+		let arc = d3.svg.arc()
+			.innerRadius(innerRadius)
+			.outerRadius(outerRadius)
+
+		let color = d3.scale.category20()
+		let arcs = svg.selectAll('g')
+			.data(pieData)
+			.enter()
+			.append('g')
+			.attr('transform', `translate(${ width / 2 }, ${ height / 2 })`)
+
+		arcs.append('path')
+			.attr('fill', (d, i) => color(i))
+			.attr('d', d => arc(d))
+
+		arcs.append('text')
+			.attr('transform', d => {
+				let x = arc.centroid(d)[0] * 1.4
+				let y = arc.centroid(d)[1] * 1.4
+				return `translate(${ x }, ${ y })`
+			})
+			.attr('text-anchor', 'middle')
+			.text(d => {
+				let percent = Number(d.value) /
+					d3.sum(data, d => d[1]) * 100
+				return percent.toFixed(1) + '%'
+			})
+
+
+		arcs.append('text')
+			.attr('transform', d => {
+				let x = arc.centroid(d)[0] * 2.4
+				let y = arc.centroid(d)[1] * 2.4
+				return `translate(${ x }, ${ y })`
+			})
+			.attr('text-anchor', 'middle')
+			.text(d => d.data[0])
+
+	</script>
+</body>
+</html>
