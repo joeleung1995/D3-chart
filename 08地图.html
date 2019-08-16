@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<div class="box"></div>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<script type="text/javascript" src='./09china.json.js'></script>
+	<script type="text/javascript">
+		
+		console.log(json)
+
+		/* ---------- 画板 ---------- */
+		let width = 600
+		let height = 700
+		let svg = d3.select('.box').append('svg')
+			.attr('width', width)
+			.attr('height', height)
+
+
+		/* ---------- 网格线 ---------- */
+		// let gridProjection = d3.geo.mercator()
+		// 	.center([0, 0])
+		// 	.scale(500)
+		// 	.translate([width/2, height/2])
+		// let graticule = d3.geo.graticule()
+		// 	.step([5, 5])
+		// 	// .extent([-180, -90], [180, 90])
+		// let grid = graticule()
+		// let gridPath = d3.geo.path()
+		// 	.projection(gridProjection)
+		// svg.append('g').append('path')
+		// 	.datum(grid)
+		// 	.attr('d', gridPath)
+		// 	.attr('stroke', 'black')
+
+
+		/* ---------- 平面地图 ---------- */
+		// let projection = d3.geo.mercator() // 投影
+		// 	.center([107, 31]) // 设定地图的中心位置，107是经度，31是纬度
+		// 	.scale(500)
+		// 	.translate([width/2, height/2]) // 将地图的中心位置平移到svg画板的中心
+
+		// let path = d3.geo.path()
+		// 	.projection(projection) // 设定投影
+
+		// let color = d3.scale.category20()
+
+		// let groups = svg.append('g')
+		// groups.selectAll('path')
+		// 	.data(json.features)
+		// 	.enter()
+		// 	.append('path')
+		// 	.attr('class', 'province')
+		// 	.style('fill', (d, i) => color(i))
+		// 	.attr('d', path)
+		// 	.on('mouseover', function (d) {
+		// 		let area = path.area(d)
+		// 		let centroid = path.centroid(d)
+		// 		let bounds = path.bounds(d)
+		// 		console.log('省份: ', d.properties.name)
+		// 		console.log('面积: ', area)
+		// 		console.log('中心: ', centroid)
+		// 		console.log('边界框: ', bounds)
+		// 	})
+
+		/* ---------- 球面投影 ---------- */
+		let gridProjection = d3.geo.orthographic()
+			.center([0, 0])
+			.scale(130)
+			.translate([width/2, height/2])
+		let graticule = d3.geo.graticule()
+			.step([10, 10])
+			// .extent([-180, -90], [180, 90])
+		let grid = graticule()
+		let gridPath = d3.geo.path()
+			.projection(gridProjection)
+		svg.append('g').append('path')
+			.datum(grid)
+			.attr('d', gridPath)
+			.attr('stroke', 'black')
+			.attr('fill', 'none')
+
+		let ortho = d3.geo.orthographic()
+			.scale(130)
+			.translate([width / 2, height/ 2])
+			.rotate([-100, 0, 0])
+			.clipAngle(90)
+		let path = d3.geo.path()
+			.projection(ortho) // 设定投影
+
+		let color = d3.scale.category20()
+
+		let groups = svg.append('g')
+		groups.selectAll('path')
+			.data(json.features)
+			.enter()
+			.append('path')
+			.attr('class', 'province')
+			.style('fill', (d, i) => color(i))
+			.attr('d', path)
+
+		/* ---------- 根据经纬度计算地形数据 ---------- */
+		// let beijing = [116.4, 39.9]
+		// let shanghai = [121.5, 31.2]
+
+		// let dis = d3.geo.distance(beijing, shanghai)
+		// console.log(dis) // 0.16815033426374731 - 弧度值
+
+		// let interpolator = d3.geo.interpolate(beijing, shanghai)
+		// console.log(interpolator(0.5))
+
+	</script>
+</body>
+</html>
