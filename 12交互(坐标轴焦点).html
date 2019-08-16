@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+		}
+	</style>
+</head>
+<body>
+	<div class="box"></div>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<script>
+
+		let data = [{
+			country: 'china',
+			gdp: [
+				[2000, 11920], [2001, 13170], [2002, 14550],
+				[2003, 16500], [2004, 19440], [2005, 22870],
+				[2006, 27930], [2007, 35040], [2008, 45470],
+				[2009, 51050], [2010, 59490], [2011, 73140],
+				[2012, 83860], [2013, 103550]
+			]
+		}, {
+			country: 'japan',
+			gdp: [
+				[2000, 47310], [2001, 41590], [2002, 39800],
+				[2003, 43020], [2004, 46550], [2005, 45710],
+				[2006, 43560], [2007, 43560], [2008, 48490],
+				[2009, 50350], [2010, 54950], [2011, 59050],
+				[2012, 59370], [2013, 48980]
+			]
+		}]
+
+		function draw (data, width = 600, height = 600) {
+			let padding = 60
+			let w = width - padding * 2
+			let h = height - padding * 2
+			let minYear = d3.min(data, d => d3.min(d.gdp, dGdp => dGdp[0]))
+			let maxYear = d3.max(data, d => d3.max(d.gdp, dGdp => dGdp[0]))
+			let minGDP = d3.min(data, d => d3.min(d.gdp, dGdp => dGdp[1]))
+			let maxGDP = d3.max(data, d => d3.max(d.gdp, dGdp => dGdp[1]))
+
+			let svg = d3.select('.box').append('svg')
+				.attr('width', width)
+				.attr('height', height)
+
+			let scaleX = d3.scale.linear()
+				.domain([minYear, maxYear])
+				.range([0, w])
+			let scaleY = d3.scale.linear()
+				.domain([0, maxGDP * 1.1])
+				.range([h, 0])
+			
+			// 坐标轴
+			let axisX = d3.svg.axis().scale(scaleX).orient('bottom').ticks(maxYear - minYear)
+			let gAxisX = svg.append('g')
+				.attr('class', 'axis')
+				.attr('transform', `translate(${padding}, ${padding + h})`)
+			axisX(gAxisX)
+			let axisY = d3.svg.axis().scale(scaleY).orient('left')
+			let gAxisY = svg.append('g')
+				.attr('class', 'axis')
+				.attr('transform', `translate(${padding}, ${padding})`)
+			axisY(gAxisY)
+
+			// 颜色
+			let color = d3.scale.category10()
+
+			// 折线
+			let line = d3.svg.line()
+				.x(d => scaleX(d[0]))
+				.y(d => scaleY(d[1]))
+			let enter = svg.selectAll('path.line').data(data)
+				.enter()
+			enter.append('path')
+				.attr('class', 'line')
+				.attr('d', d => line(d.gdp))
+				.attr('stroke', (d, i) => color(i))
+				.attr('stroke-width', '2px')
+				.attr('fill', 'none')
+				.attr('transform', `translate(${padding}, ${padding})`)
+
+			// 透明遮罩（用来监听mouseover事件）
+			let circle = svg.append('circle')
+				.attr('fill', 'none')
+				.attr('cx', -20)
+				.attr('cy', -20)
+				.attr('r', '4')
+			let text = svg.append('text')
+				.attr('fill', 'black')
+  			.attr('font-size', '12px')
+   			.attr('text-anchor', 'left')
+				.style('display', 'none')
+			let lineX = svg.append('line')
+				.attr('stroke', 'black')
+				.attr('stroke-dasharray', '10,10')
+				.style('display', 'none')
+			let lineY = svg.append('line')
+				.attr('stroke', 'black')
+				.attr('stroke-dasharray', '10,10')
+				.style('display', 'none')
+			let curtain = svg.append('rect')
+				.attr('width', w)
+				.attr('height', h)
+				.attr('x', padding)
+				.attr('y', padding)
+				.attr('fill', 'none')
+				.style('pointer-events', 'all')
+				.data(data)
+				.on('mouseenter', function (d) {
+					circle.attr('fill', '#333')
+					text.style('display', 'block')
+					lineX.style('display', 'block')
+					lineY.style('display', 'block')
+				})
+				.on('mousemove', function (d) {
+					let mouseX = d3.mouse(this)[0] - padding
+					let mouseY = d3.mouse(this)[1] - padding
+					let x = Math.round(scaleX.invert(mouseX))
+					let index = d.gdp.findIndex(item => item[0] === x)
+					let y = d.gdp[index][1]
+					let renderX = scaleX(x) + padding
+					let renderY = scaleY(y) + padding
+					circle.attr('cx', renderX).attr('cy', renderY)
+					text.attr('x', renderX + 10)
+						.attr('y', renderY + 3)
+						.text(`${x}年的GDP为${y}`)
+					lineX.attr('x1', renderX)
+					lineX.attr('x2', padding)
+					lineX.attr('y1', renderY)
+					lineX.attr('y2', renderY)
+					lineY.attr('x1', renderX)
+					lineY.attr('x2', renderX)
+					lineY.attr('y1', renderY)
+					lineY.attr('y2', h + padding)
+				})
+				.on('mouseleave', function (d) {
+					circle.attr('fill', 'none')
+					text.style('display', 'none')
+					lineX.style('display', 'none')
+					lineY.style('display', 'none')
+				})
+		}
+
+		draw(data)
+
+	</script>
+</body>
+</html>
