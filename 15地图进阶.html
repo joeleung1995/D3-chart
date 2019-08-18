@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		.info_box {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 120px;
+			border: 2px solid #424242;
+			border-radius: 4px;
+			background-color: #fff;
+			padding: 10px;
+			opacity: 0;
+		}
+		.info_box p {
+			color: #424242;
+			margin: 0;
+		}
+	</style>
+</head>
+<body>
+	<div class="box"></div>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<script type="text/javascript" src='./09china.json.js'></script>
+	<script type="text/javascript" src='./16旅游产值地图假数据.json.js'></script>
+	<script type="text/javascript">
+		/* 
+
+			内容包括：
+				1、将值域映射到颜色，并应用到地图上，如中国各省的GDP
+				2、制作标注
+				3、制作标注线
+				4、对地图的拖拽和缩放
+
+		 */
+
+		/* ---------- 画板 ---------- */
+		let width = 600
+		let height = 700
+		let svg = d3.select('.box').append('svg')
+			.attr('width', width)
+			.attr('height', height)
+
+
+		/* ---------- 平面地图 ---------- */
+		let projection = d3.geo.mercator() // 投影
+			.center([107, 31]) // 设定地图的中心位置，107是经度，31是纬度
+			.scale(500)
+			.translate([width/2, height/2]) // 将地图的中心位置平移到svg画板的中心
+
+		let path = d3.geo.path()
+			.projection(projection) // 设定投影
+
+		let color = d3.scale.category20()
+
+		let groups = svg.append('g')
+		let provinces = groups.selectAll('path')
+			.data(json.features)
+			.enter()
+			.append('path')
+			.attr('class', 'province')
+			.style('fill', (d, i) => color(i))
+			.attr('d', path)
+
+
+		/* ---------- 颜色 ---------- */
+		let paleGreen = d3.rgb('#a0cc78')
+		let darkGreen = d3.rgb('#207561')
+		let colorDict = d3.interpolate(paleGreen, darkGreen) // 颜色插值函数
+		let maxVal = d3.max(tourism.provinces, d => Number(d.value))
+		let linear = d3.scale.linear() // 结合比例尺就可以轻松设置出不同深度的绿色
+			.domain([0, maxVal])
+			.range([0, 1])
+		let tourismDict = {}
+		tourism.provinces.forEach(province => {
+			tourismDict[province.name] = province.value
+		})
+
+		provinces.style('fill', d => {
+			let value = tourismDict[d.properties.name] || 0
+			let linearVal = linear(value)
+			let color =  colorDict(linearVal).toString()
+			return color
+		})
+		provinces.each(province => {
+			province.properties.tourism = tourismDict[province.properties.name]
+		})
+		
+		// 颜色说明
+		let defs = svg.append('defs')
+		let linearGradient = defs.append('linearGradient')
+			.attr('id', 'linearColor')
+			.attr('x1', '0%') // 设定渐变方向
+			.attr('y1', '0%')
+			.attr('x2', '100%')
+			.attr('y2', '0%')
+		linearGradient.append('stop')
+			.attr('offset', '0%')
+			.attr('stop-color', '#a0cc78')
+		linearGradient.append('stop')
+			.attr('offset', '100%')
+			.attr('stop-color', '#207561')
+		let colorRect = svg.append('rect')
+			.attr('x', 20)
+			.attr('y', height - 50)
+			.attr('width', 150)
+			.attr('height', 30)
+			.style('fill', `url(#${ linearGradient.attr('id') })`)
+		svg.append('text')
+			.text('0')
+			.attr('x', 20)
+			.attr('y', colorRect.attr('y') - 10)
+			.attr('text-anchor', 'middle')
+		svg.append('text')
+			.text(maxVal)
+			.attr('x', Number(colorRect.attr('x')) + Number(colorRect.attr('width')))
+			.attr('y', colorRect.attr('y') - 10)
+			.attr('text-anchor', 'middle')
+
+		// 鼠标悬浮信息框
+		// let infoBox = d3.select('body').append('div').attr('class', 'info_box')
+		// provinces
+		// .on('mouseenter', (d) => {
+		// 	infoBox.style('opacity', 1)
+		// 	let area = path.area(d)
+		// 	infoBox.append('p').text('省份: ' + d.properties.name)
+		// 	infoBox.append('p').text('面积: ' + parseInt(area))
+		// 	infoBox.append('p').text('旅游产值: ' + d.properties.tourism || 0)
+		// 	infoBox.style('left', d3.event.x + 'px')
+		// 	infoBox.style('top', d3.event.y + 'px')
+		// })
+		// .on('mouseleave', () => {
+		// 	infoBox.style('opacity', 0)
+		// 	infoBox.selectAll('p').remove()
+		// })
+
+		// 标注
+		// let peking = [116.3, 39.9]
+		// let proPeking = projection(peking) // 纬度坐标转换为像素坐标
+		// svg.append('circle')
+		// 	.attr('class', 'point')
+		// 	.attr('cx', proPeking[0])
+		// 	.attr('cy', proPeking[1])
+		// 	.attr('r', 4)
+
+		// // 标注线
+		// let proGuilin = projection([110.3, 25.3])
+		// svg.append('line')
+		// 	.attr('x1', proGuilin[0])
+		// 	.attr('y1', proGuilin[1])
+		// 	.attr('x2', proPeking[0])
+		// 	.attr('y2', proPeking[1])
+		// 	.attr('stroke', 'black')
+		// 	.attr('marker-end', 'url(#arrow)')
+
+		// 对地图的拖拽和缩放
+		let initTran = projection.translate()
+		let initScale = projection.scale()
+		let zoom = d3.behavior.zoom()
+			.scaleExtent([1, 10])
+			.on('zoom', function (d) {
+				// projection.translate([
+				// 	initTran[0] + d3.event.translate[0],
+				// 	initTran[1] + d3.event.translate[1]
+				// ])
+				projection.scale(initScale * d3.event.scale)
+				provinces.attr('d', path)
+			})
+		svg.append('rect')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('width', width)
+			.attr('height', height)
+			.style('fill', 'none')
+			.style('pointer-events', 'all')
+			.call(zoom)
+
+	</script>
+</body>
+</html>
