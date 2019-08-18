@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<div class="box"></div>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	<script type="text/javascript">
+		
+		let width = 400
+		let height = 400
+
+		let svg = d3.select('.box').append('svg')
+			.attr('width', width)
+			.attr('height', height)
+
+		let circle = svg.append('circle')
+			.attr('cx', width / 3)
+			.attr('cy', height / 3)
+			.attr('r', 20)
+			.attr('fill', 'steelblue')
+		let rect = svg.append('rect')
+			.attr('x', width / 3 * 2)
+			.attr('y', height / 3 * 2)
+			.attr('width', 50)
+			.attr('height', 50)
+			.attr('fill', 'orange')
+
+		let scaleX = d3.scale.linear()
+			.domain([0, width])
+			.range([0, width])
+		let scaleY = d3.scale.linear()
+			.domain([0, height])
+			.range([0, height])
+
+		let brush = d3.svg.brush()
+			.x(scaleX)
+			.y(scaleY)
+			.extent([0, 0], [100, 100])
+			.on('brush', function () {
+				let extent = brush.extent()
+				if (extent[0][0] > width / 3
+					&& extent[0][1] > height / 3) {
+					circle.attr('fill', 'green')
+				}
+			})
+		svg.append('g')
+			.call(brush)
+			.selectAll('rect')
+			.style('fill-opacity', 0.3)
+
+	</script>
+</body>
+</html>
